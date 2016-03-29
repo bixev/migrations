@@ -50,7 +50,7 @@ class MysqlVersionStore extends AbstractVersionStore
         return str_replace("'", '`', $this->_db->quote($str));
     }
 
-    public function getCurrentVersion($namespace)
+    public function doGetCurrentVersion($namespace)
     {
         $sql = "SELECT code_version, data_version 
                 FROM " . $this->backquote($this->_tableName) . "

@@ -8,6 +8,7 @@ abstract class AbstractUpdater
 
     public function update($path)
     {
+        $this->_newVersion = null;
         $this->doUpdate($path);
     }
 

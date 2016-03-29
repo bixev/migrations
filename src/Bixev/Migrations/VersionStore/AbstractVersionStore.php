@@ -7,7 +7,7 @@ abstract class AbstractVersionStore
     use \Bixev\LightLogger\LoggerTrait;
 
     /**
-     * @var VersionStore\AbstractVersionStore
+     * @var AbstractVersionStore
      */
     protected $_versionStore;
 
@@ -26,7 +26,17 @@ abstract class AbstractVersionStore
 
     abstract public function initialize();
 
-    abstract public function getCurrentVersion($namespace);
+    public function getCurrentVersion($namespace)
+    {
+        $currentVersion = $this->doGetCurrentVersion($namespace);
+        if (empty($currentVersion)) {
+            $currentVersion = $this->getUnexistingVersion();
+        }
+
+        return $currentVersion;
+    }
+
+    abstract public function doGetCurrentVersion($namespace);
 
     public function updateVersion($namespace, $newVersion = null)
     {
@@ -43,12 +53,11 @@ abstract class AbstractVersionStore
     protected function getIncrementedVersion($namespace)
     {
         $currentVersion = $this->getCurrentVersion($namespace);
-        if (empty($currentVersion)) {
-            $currentVersion = $this->getUnexistingVersion();
-        }
 
         return $this->incrementedVersion($currentVersion);
     }
+
+    abstract protected function incrementedVersion($version);
 
     abstract protected function getUnexistingVersion();
 
