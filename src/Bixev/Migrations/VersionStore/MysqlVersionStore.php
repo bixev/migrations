@@ -40,7 +40,7 @@ class MysqlVersionStore extends AbstractVersionStore
                   `date_out` DATETIME DEFAULT NULL COMMENT 'date out of this version',
                   `name` VARCHAR( 50 ) NOT NULL DEFAULT '' COMMENT 'version namespace',
                   PRIMARY KEY  (`id`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='data updates history' ;";
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='data updates history' ;";
 
         $this->_db->exec($sql);
     }
