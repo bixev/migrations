@@ -1,8 +1,14 @@
 <?php
+
 namespace Bixev\Migrations\VersionStore;
 
 class MysqlVersionStore extends AbstractVersionStore
 {
+
+    const ENGINE_MYISAM = 'MyISAM';
+    const ENGINE_INNODB = 'InnoDB';
+
+    protected $_defaultEngine = self::ENGINE_MYISAM;
 
     /**
      * @var \PDO
@@ -13,8 +19,20 @@ class MysqlVersionStore extends AbstractVersionStore
 
     public function setDb(\PDO $databaseConnector, $tableName)
     {
-        $this->_db = $databaseConnector;
+        $this->_db        = $databaseConnector;
         $this->_tableName = $tableName;
+    }
+
+    /**
+     * @param $engine
+     */
+    public function setDefaultEngine($engine)
+    {
+        if (!in_array($engine, [self::ENGINE_MYISAM, self::ENGINE_INNODB])) {
+            throw new \Exception('Invalid engine : ' . $engine);
+        }
+
+        $this->_defaultEngine = $engine;
     }
 
     /**
@@ -23,7 +41,7 @@ class MysqlVersionStore extends AbstractVersionStore
     public function isInitialized()
     {
         if ($this->_db === null || $this->_tableName === null) {
-            throw new Exception('Require databaseConnector/tableName');
+            throw new \Exception('Require databaseConnector/tableName');
         }
         $rows = $this->_db->query("SHOW TABLES LIKE '" . $this->_tableName . "'")->fetchAll();
 
@@ -40,7 +58,7 @@ class MysqlVersionStore extends AbstractVersionStore
                   `date_out` DATETIME DEFAULT NULL COMMENT 'date out of this version',
                   `name` VARCHAR( 50 ) NOT NULL DEFAULT '' COMMENT 'version namespace',
                   PRIMARY KEY  (`id`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='data updates history' ;";
+                ) ENGINE=" . $this->_defaultEngine . " DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='data updates history' ;";
 
         $this->_db->exec($sql);
     }
@@ -68,7 +86,7 @@ class MysqlVersionStore extends AbstractVersionStore
     protected function doUpdateVersion($namespace, $newVersion = null)
     {
         if (strpos($newVersion, '/') !== false) {
-            $version = explode('/', $newVersion);
+            $version     = explode('/', $newVersion);
             $codeVersion = $version[0];
             $dataVersion = $version[1];
         } else {
@@ -77,7 +95,7 @@ class MysqlVersionStore extends AbstractVersionStore
         }
 
         $oDateNow = new \DateTime('NOW', new \DateTimeZone('Europe/Paris'));
-        $dateNow = $oDateNow->format('Y-m-d H:i:s');
+        $dateNow  = $oDateNow->format('Y-m-d H:i:s');
 
         $sql = "UPDATE " . $this->_tableName . "
                 SET date_out = " . $this->_db->quote($dateNow) . "
@@ -97,7 +115,7 @@ class MysqlVersionStore extends AbstractVersionStore
     protected function incrementedVersion($version)
     {
         if (strpos($version, '/') !== false) {
-            $version = explode('/', $version);
+            $version     = explode('/', $version);
             $codeVersion = $version[0];
             $dataVersion = $version[1];
         } else {

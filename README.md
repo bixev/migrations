@@ -39,7 +39,15 @@ You have to give the api as many updaters as you have migrations file extensions
 
 ```php
 $migrationsApi->setUpdater('php', new \Bixev\Migrations\Updater\PhpUpdater());
-$migrationsApi->setUpdater('sql', new \Bixev\Migrations\Updater\MysqlUpdater());
+$mysqlUpdater = new \Bixev\Migrations\Updater\MysqlUpdater();
+$mysqlUpdater->setQueryExecutor(
+    function ($query) use ($pdoMysql) {
+        $replacements = ['${DEFAULT_ENGINE}' => 'pouet'];
+        $query        = str_replace(array_keys($replacements), array_values($replacements), $query);
+        $pdoMysql->query($query);
+    }
+);
+$migrationsApi->setUpdater('sql', $mysqlUpdater);
 ```
 
 Then, simply update with namespace and updates directory
