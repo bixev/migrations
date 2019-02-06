@@ -17,7 +17,11 @@ class MysqlVersionStore extends AbstractVersionStore
 
     protected $_tableName;
 
-    public function setDb(\PDO $databaseConnector, $tableName)
+    /**
+     * @param \PDO $databaseConnector PDO or any object implementing same methods
+     * @param $tableName
+     */
+    public function setDb($databaseConnector, $tableName)
     {
         $this->_db        = $databaseConnector;
         $this->_tableName = $tableName;
